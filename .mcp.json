@@ -1,0 +1,33 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "playwright-mcp",
+      "args": [],
+      "env": {}
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/my_workroom/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/my_workroom/invoice-web/shrimp_data",
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "true"
+      }
+    }       
+  }
+}
