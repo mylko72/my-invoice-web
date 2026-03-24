@@ -71,6 +71,18 @@ function extractSelect(
 }
 
 /**
+ * Notion Relation 속성에서 연결된 페이지 ID 목록 추출
+ */
+function extractRelation(
+  property: PageObjectResponse["properties"][string]
+): string[] {
+  if (property.type === "relation") {
+    return property.relation.map((r) => r.id);
+  }
+  return [];
+}
+
+/**
  * Notion Number 속성에서 숫자 추출
  * Phase 2: 합계금액 필드 직접 읽기 또는 계산 검증 시 활용
  */
@@ -88,40 +100,25 @@ export function extractNumber(
 // ---------------------------
 
 /**
- * 견적 항목 JSON 텍스트 파싱
+ * Items DB의 단일 페이지를 InvoiceItem으로 변환
  *
- * Notion 비고 필드에 JSON 형태로 저장된 항목 데이터를 파싱합니다.
- * 예: '[{"name":"서비스명","quantity":1,"unitPrice":500000}]'
- *
- * @param rawJson - Notion 텍스트 필드의 원시 JSON 문자열
+ * @param page - Notion API Items DB 페이지 응답 객체
  * @param invoiceId - 소속 견적서 ID
  */
-function parseInvoiceItems(rawJson: string, invoiceId: string): InvoiceItem[] {
-  try {
-    const parsed = JSON.parse(rawJson) as Array<{
-      name: string;
-      quantity: number;
-      unitPrice: number;
-    }>;
-
-    return parsed.map((item, index) => {
-      const supplyAmount = item.quantity * item.unitPrice;
-      const taxAmount = Math.round(supplyAmount * 0.1);
-      return {
-        id: `${invoiceId}-item-${index}`,
-        invoiceId,
-        name: item.name,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        supplyAmount,
-        taxAmount,
-      };
-    });
-  } catch {
-    // JSON 파싱 실패 시 빈 배열 반환 (견적서 자체는 표시)
-    console.warn(`[항목 파싱 실패] invoiceId: ${invoiceId}`);
-    return [];
-  }
+function parseNotionItemPage(
+  page: PageObjectResponse,
+  invoiceId: string
+): InvoiceItem {
+  const props = page.properties;
+  return {
+    id: page.id.replace(/-/g, ""),
+    invoiceId,
+    name: extractText(props["품명"]),
+    quantity: extractNumber(props["수량"]),
+    unitPrice: extractNumber(props["단가"]),
+    supplyAmount: extractNumber(props["공급가액"]),
+    taxAmount: extractNumber(props["부가세"]),
+  };
 }
 
 // ---------------------------
@@ -130,32 +127,51 @@ function parseInvoiceItems(rawJson: string, invoiceId: string): InvoiceItem[] {
 
 /**
  * Notion 페이지 응답을 Invoice 도메인 객체로 변환
+ * Items DB 관계형 데이터는 이 함수에서 조회하지 않음
  *
  * @param page - Notion API 페이지 응답 객체
  */
-function parseNotionPage(page: PageObjectResponse): Invoice | null {
+function parseNotionPage(page: PageObjectResponse) {
   const props = page.properties;
 
-  const rawInvoice = {
+  return {
     id: page.id.replace(/-/g, ""),  // Notion ID 정규화 (하이픈 제거)
-    invoiceNumber: extractText(props["Name"]),
+    invoiceNumber: extractText(props["견적서 번호"]),
     clientName: extractText(props["고객사명"]),
-    clientContact: extractText(props["담당자"]),
+    clientContact: extractText(props["고객 담당자명"]),
     issueDate: extractDate(props["발행일"]),
     dueDate: extractDate(props["만기일"]),
     status: extractSelect(props["상태"]),
-    note: extractText(props["비고"]),
-    accessToken: extractText(props["접근토큰"]),
-    items: [], // 아래에서 별도 파싱
+    note: extractText(props["비고/메모"]),
+    itemPageIds: extractRelation(props["항목"]),  // Items DB 페이지 ID 목록
+    items: [] as InvoiceItem[],  // 아래에서 별도 조회
   };
+}
 
-  // 항목 JSON 파싱 (선택적 필드)
-  const rawItems = extractText(props["항목"]);
-  if (rawItems) {
-    rawInvoice.items = parseInvoiceItems(rawItems, rawInvoice.id) as never;
+/**
+ * Items DB 페이지들을 병렬로 조회하여 InvoiceItem 배열로 변환
+ *
+ * @param itemPageIds - Items DB 페이지 ID 목록
+ * @param invoiceId - 소속 견적서 ID
+ */
+async function fetchItemsForInvoice(
+  itemPageIds: string[],
+  invoiceId: string
+): Promise<InvoiceItem[]> {
+  if (itemPageIds.length === 0) return [];
+
+  try {
+    const pages = await Promise.all(
+      itemPageIds.map((id) => notion.pages.retrieve({ page_id: id }))
+    );
+
+    return pages
+      .filter((p): p is PageObjectResponse => "properties" in p && !p.archived)
+      .map((p) => parseNotionItemPage(p as PageObjectResponse, invoiceId));
+  } catch (error) {
+    console.error(`[Items 조회 실패] invoiceId: ${invoiceId}`, error);
+    return [];
   }
-
-  return validateInvoice(rawInvoice);
 }
 
 // ---------------------------
@@ -177,7 +193,17 @@ async function fetchInvoiceFromNotion(invoiceId: string): Promise<Invoice | null
       return null;
     }
 
-    return parseNotionPage(page as PageObjectResponse);
+    const pageData = parseNotionPage(page as PageObjectResponse);
+
+    // Items DB 페이지들을 병렬로 조회
+    const items = await fetchItemsForInvoice(pageData.itemPageIds, pageData.id);
+
+    const rawInvoice = {
+      ...pageData,
+      items,
+    };
+
+    return validateInvoice(rawInvoice);
   } catch (error) {
     // 존재하지 않는 페이지 ID → Notion API가 404 에러 throw
     console.error(`[Notion API 오류] invoiceId: ${invoiceId}`, error);

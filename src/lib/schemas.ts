@@ -54,7 +54,7 @@ export const invoiceSchema = z.object({
   dueDate: z.string().min(1, "만기일은 필수입니다"),
   status: invoiceStatusSchema,
   note: z.string().default(""),
-  accessToken: z.string().min(1, "접근 토큰은 필수입니다"),
+  accessToken: z.string().optional(),
   items: z.array(invoiceItemSchema).default([]),
 });
 

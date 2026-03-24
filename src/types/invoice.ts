@@ -56,8 +56,8 @@ export interface Invoice {
   status: InvoiceStatus;
   /** 비고/메모 */
   note: string;
-  /** URL 공유용 접근 토큰 (UUID v4) */
-  accessToken: string;
+  /** URL 공유용 접근 토큰 (UUID v4) — 현재 DB에 없는 필드, 향후 추가 예정 */
+  accessToken?: string;
   /** 견적 항목 목록 */
   items: InvoiceItem[];
 }
