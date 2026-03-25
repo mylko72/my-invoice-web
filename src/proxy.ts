@@ -18,25 +18,10 @@
  */
 
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 // Next.js 16: proxy 파일에서는 "proxy" 또는 default로 함수를 내보내야 합니다.
-export function proxy(request: NextRequest) {
-  const { pathname, searchParams } = request.nextUrl;
-
-  // /invoice/[id] 경로에만 proxy 적용
-  if (pathname.startsWith("/invoice/")) {
-    const token = searchParams.get("token");
-
-    // 토큰 파라미터가 없으면 접근 거부 페이지로 리디렉션
-    if (!token) {
-      const deniedUrl = new URL("/denied", request.url);
-      deniedUrl.searchParams.set("reason", "TOKEN_INVALID");
-      return NextResponse.redirect(deniedUrl);
-    }
-  }
-
-  // 그 외 모든 경로는 통과
+export function proxy() {
+  // 모든 경로 통과 (토큰 검증 없음)
   return NextResponse.next();
 }
 
