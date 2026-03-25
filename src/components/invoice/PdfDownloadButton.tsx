@@ -16,9 +16,11 @@ export function PdfDownloadButton({ invoice }: PdfDownloadButtonProps) {
   const handleDownload = async () => {
     setIsGenerating(true);
     try {
-      // Phase 4-2에서 구현한 PDF 생성 로직 호출
-      const { generateInvoicePdf } = await import("@/lib/pdf");
-      await generateInvoicePdf(invoice);
+      // html2canvas + jsPDF 방식으로 견적서 본문 DOM 캡처
+      const { generatePdfFromDom } = await import("@/lib/pdf-canvas");
+      const { generatePdfFileName } = await import("@/utils/format");
+      const fileName = generatePdfFileName(invoice.invoiceNumber, invoice.issueDate);
+      await generatePdfFromDom("invoice-body", fileName);
       toast.success("PDF가 다운로드되었습니다.");
     } catch (error) {
       console.error("PDF 생성 실패:", error);

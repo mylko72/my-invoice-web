@@ -87,7 +87,10 @@ export default async function InvoicePage({ params }: PageProps) {
         <InvoiceActions invoice={invoice} />
 
         {/* 견적서 본문 (A4 비율) */}
-        <div className="bg-card shadow-sm rounded-lg p-8 print:bg-white print:shadow-none print:rounded-none">
+        <div
+          id="invoice-body"
+          className="bg-card shadow-sm rounded-lg p-8 print:bg-white print:shadow-none print:rounded-none"
+        >
 
           {/* 헤더: 발급사 정보, 견적서 번호/날짜/상태 */}
           <InvoiceHeader invoice={invoice} />
