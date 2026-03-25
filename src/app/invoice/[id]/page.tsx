@@ -80,8 +80,8 @@ export default async function InvoicePage({ params }: PageProps) {
   summary.grandTotal = summary.totalSupply + summary.totalTax;
 
   return (
-    <div className="min-h-screen bg-muted/30 py-8 px-4 print:bg-white print:py-0 print:px-0">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background py-8 px-4 print:bg-white print:py-0 print:px-0">
+      <div className="max-w-3xl mx-auto">
 
         {/* 액션 버튼 (인쇄 시 숨김) */}
         <InvoiceActions
@@ -90,7 +90,7 @@ export default async function InvoicePage({ params }: PageProps) {
         />
 
         {/* 견적서 본문 (A4 비율) */}
-        <div className="bg-white shadow-sm rounded-lg p-8 print:shadow-none print:rounded-none">
+        <div className="bg-card shadow-sm rounded-lg p-8 print:bg-white print:shadow-none print:rounded-none">
 
           {/* 헤더: 발급사 정보, 견적서 번호/날짜/상태 */}
           <InvoiceHeader invoice={invoice} />

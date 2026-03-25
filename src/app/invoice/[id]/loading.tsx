@@ -14,8 +14,8 @@
  */
 export default function InvoiceLoading() {
   return (
-    <div className="min-h-screen bg-muted/30 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <div className="max-w-3xl mx-auto">
 
         {/* 액션 버튼 스켈레톤 */}
         <div className="flex justify-end gap-3 mb-6">
@@ -24,26 +24,23 @@ export default function InvoiceLoading() {
         </div>
 
         {/* 견적서 본문 스켈레톤 */}
-        <div className="bg-white shadow-sm rounded-lg p-8">
+        <div className="bg-card shadow-sm rounded-lg p-8">
 
           {/* InvoiceHeader 스켈레톤 */}
-          <div className="flex justify-between items-start mb-8">
-            {/* 좌측: 발급사명 */}
-            <div className="space-y-2">
-              <div className="h-7 w-32 bg-muted animate-pulse rounded" />
+          <div className="text-center mb-8">
+            <div className="h-10 w-48 bg-muted animate-pulse rounded mx-auto mb-3" />
+            <div className="flex justify-center items-center gap-4 flex-wrap">
+              <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-32 bg-muted animate-pulse rounded" />
             </div>
-            {/* 우측: 제목, 번호, 날짜, 상태 */}
-            <div className="text-right space-y-2">
-              <div className="h-8 w-24 bg-muted animate-pulse rounded ml-auto" />
-              <div className="h-4 w-36 bg-muted animate-pulse rounded ml-auto" />
-              <div className="h-4 w-36 bg-muted animate-pulse rounded ml-auto" />
-              <div className="h-4 w-36 bg-muted animate-pulse rounded ml-auto" />
-              <div className="h-5 w-16 bg-muted animate-pulse rounded-full ml-auto" />
+            <div className="flex justify-center pt-2">
+              <div className="h-5 w-16 bg-muted animate-pulse rounded-full" />
             </div>
           </div>
 
           {/* InvoiceClientInfo 스켈레톤 */}
-          <div className="border border-gray-200 rounded-md p-4 mb-6 space-y-2">
+          <div className="border border-border rounded-md p-4 mb-6 space-y-2">
             <div className="h-4 w-56 bg-muted animate-pulse rounded" />
             <div className="h-4 w-40 bg-muted animate-pulse rounded" />
           </div>
