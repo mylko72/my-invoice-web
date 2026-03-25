@@ -215,18 +215,19 @@ async function fetchInvoiceFromNotion(invoiceId: string): Promise<Invoice | null
  * 견적서 단건 조회 (60초 캐시 적용)
  *
  * 동일한 invoiceId는 60초 동안 Notion API를 재호출하지 않습니다.
- * 캐시 키: ["invoice", invoiceId]
+ * 캐시 키: ["invoice", invoiceId] → invoiceId별로 별도 캐시
  *
  * @param invoiceId - Notion 페이지 ID
  */
-export const getInvoice = unstable_cache(
-  fetchInvoiceFromNotion,
-  ["invoice"],
-  {
-    revalidate: 60, // 60초 캐시
-    tags: ["invoice"],
-  }
-);
+export const getInvoice = (invoiceId: string) =>
+  unstable_cache(
+    () => fetchInvoiceFromNotion(invoiceId),
+    ["invoice", invoiceId],  // invoiceId를 캐시 키에 포함!
+    {
+      revalidate: 60, // 60초 캐시
+      tags: ["invoice"],
+    }
+  )();
 
 // ---------------------------
 // 토큰 검증
