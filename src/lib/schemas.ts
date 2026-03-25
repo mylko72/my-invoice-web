@@ -46,7 +46,7 @@ export const invoiceStatusSchema = z.enum(["draft", "sent", "accepted"]);
  * Notion 페이지 파싱 결과를 검증합니다.
  */
 export const invoiceSchema = z.object({
-  id: z.string().uuid("Notion 페이지 ID는 UUID 형식이어야 합니다"),
+  id: z.string().regex(/^[a-f0-9]{32}$/, "Notion 페이지 ID는 32자리 16진수여야 합니다"),
   invoiceNumber: z.string().min(1, "견적서 번호는 필수입니다"),
   clientName: z.string().min(1, "고객사명은 필수입니다"),
   clientContact: z.string().default(""),
@@ -80,7 +80,13 @@ export type InvoiceSchema = z.infer<typeof invoiceSchema>;
 export function validateInvoice(data: unknown): InvoiceSchema | null {
   const result = invoiceSchema.safeParse(data);
   if (!result.success) {
-    console.error("[스키마 검증 실패]", result.error.flatten());
+    const flattened = result.error.flatten();
+    console.error("[스키마 검증 실패]", flattened);
+    console.error("[검증 상세]", JSON.stringify({
+      formErrors: flattened.formErrors,
+      fieldErrors: flattened.fieldErrors,
+      inputData: typeof data === 'object' ? JSON.stringify(data, null, 2) : data,
+    }, null, 2));
     return null;
   }
   return result.data;
