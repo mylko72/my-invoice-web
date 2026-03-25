@@ -11,3 +11,4 @@ export { default as InvoiceSummary } from "./InvoiceSummary";
 export { default as InvoiceNote } from "./InvoiceNote";
 export { default as InvoiceActions } from "./InvoiceActions";
 export { default as InvoiceStatusBadge } from "./InvoiceStatusBadge";
+export { PdfDownloadButton } from "./PdfDownloadButton";

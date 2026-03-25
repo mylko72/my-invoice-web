@@ -84,10 +84,7 @@ export default async function InvoicePage({ params }: PageProps) {
       <div className="max-w-3xl mx-auto">
 
         {/* 액션 버튼 (인쇄 시 숨김) */}
-        <InvoiceActions
-          invoiceNumber={invoice.invoiceNumber}
-          issueDate={invoice.issueDate}
-        />
+        <InvoiceActions invoice={invoice} />
 
         {/* 견적서 본문 (A4 비율) */}
         <div className="bg-card shadow-sm rounded-lg p-8 print:bg-white print:shadow-none print:rounded-none">
