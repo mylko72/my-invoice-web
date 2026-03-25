@@ -9,7 +9,15 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { AlertCircle, Mail, ArrowLeft } from "lucide-react";
+import {
+  AlertCircle,
+  Mail,
+  ArrowLeft,
+  ShieldX,
+  Clock,
+  FileX,
+  AlertTriangle,
+} from "lucide-react";
 import type { InvoiceErrorCode } from "@/types/invoice";
 
 export const metadata: Metadata = {
@@ -24,6 +32,20 @@ interface PageProps {
 /**
  * 오류 코드에 따른 사용자 안내 메시지 정의
  */
+/**
+ * 오류 코드별 아이콘 정의
+ * 각 오류 유형을 시각적으로 구분합니다.
+ */
+const errorIcons: Record<
+  InvoiceErrorCode,
+  typeof AlertCircle
+> = {
+  TOKEN_INVALID: ShieldX,      // 유효하지 않은 토큰
+  TOKEN_EXPIRED: Clock,         // 만료됨
+  INVOICE_NOT_FOUND: FileX,    // 파일 없음
+  SERVER_ERROR: AlertTriangle, // 서버 오류
+};
+
 const errorMessages: Record<InvoiceErrorCode, { title: string; description: string }> = {
   TOKEN_INVALID: {
     title: "유효하지 않은 링크입니다",
@@ -64,9 +86,13 @@ export default async function DeniedPage({ searchParams }: PageProps) {
   const isValidCode = (code: string | undefined): code is InvoiceErrorCode =>
     Boolean(code && code in errorMessages);
 
-  const { title, description } = isValidCode(reason)
-    ? errorMessages[reason]
+  const validCode = isValidCode(reason) ? reason : null;
+  const { title, description } = validCode
+    ? errorMessages[validCode]
     : defaultError;
+
+  // 오류 코드에 맞는 아이콘 선택 (기본값: AlertCircle)
+  const IconComponent = validCode ? errorIcons[validCode] : AlertCircle;
 
   // 담당자 이메일 (환경변수)
   const contactEmail = process.env.CONTACT_EMAIL;
@@ -78,7 +104,7 @@ export default async function DeniedPage({ searchParams }: PageProps) {
         {/* 오류 아이콘 */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-destructive" />
+            <IconComponent className="w-8 h-8 text-destructive" />
           </div>
         </div>
 
@@ -88,6 +114,17 @@ export default async function DeniedPage({ searchParams }: PageProps) {
 
         {/* 액션 버튼 */}
         <div className="flex flex-col gap-3">
+
+          {/* 재시도 버튼 (SERVER_ERROR인 경우에만 표시) */}
+          {validCode === "SERVER_ERROR" && (
+            <button
+              onClick={() => typeof window !== "undefined" && window.location.reload()}
+              className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              다시 시도
+            </button>
+          )}
 
           {/* 담당자 연락 버튼 (이메일이 설정된 경우에만 표시) */}
           {contactEmail && (
@@ -111,9 +148,9 @@ export default async function DeniedPage({ searchParams }: PageProps) {
         </div>
 
         {/* 오류 코드 표시 (디버깅용) */}
-        {reason && (
+        {validCode && (
           <p className="mt-6 text-xs text-gray-400">
-            오류 코드: {reason}
+            오류 코드: {validCode}
           </p>
         )}
       </div>
