@@ -347,25 +347,24 @@ export async function queryInvoices(options?: {
  * 서버 사이드에서만 호출하세요 (토큰 검증 로직 노출 방지).
  *
  * 접근 제어 전략:
- * 1. Notion DB에 accessToken 필드가 있는 경우 → 토큰 비교 검증
- * 2. accessToken 필드가 없는 경우 (MVP) → token 파라미터 존재만 확인
- *    (Notion 페이지 ID 자체가 32자리 hex로 추측 불가능하므로 MVP에서 허용)
+ * 1. Notion DB에 accessToken 필드가 있는 경우 → 토큰 필수 & 일치 검증
+ * 2. accessToken 필드가 없는 경우 (MVP) → token 파라미터 선택적
+ *    (Notion 페이지 ID 자체가 32자리 hex로 추측 불가능하므로 ID 기반 접근 제어 사용)
  *
  * @param invoice - 조회한 견적서 객체
  * @param token - URL 쿼리 파라미터에서 추출한 토큰
  * @returns 유효하면 true, 무효하면 false
  */
 export function validateAccessToken(invoice: Invoice, token: string): boolean {
-  if (!token) return false;
-
-  // DB에 accessToken이 설정된 경우 → 정확한 토큰 비교
-  if (invoice.accessToken) {
-    return invoice.accessToken === token;
+  // DB에 accessToken이 없는 경우 (MVP) → token 파라미터 선택적
+  // Notion 페이지 ID 자체가 보안을 제공하므로 token이 없어도 통과
+  if (!invoice.accessToken) {
+    return true;
   }
 
-  // DB에 accessToken이 없는 경우 (MVP) → token 파라미터 존재만 확인
-  // 향후 HMAC 방식이나 DB 필드 추가로 강화 가능
-  return true;
+  // DB에 accessToken이 설정된 경우 → 토큰 필수 & 정확한 토큰 비교
+  if (!token) return false;
+  return invoice.accessToken === token;
 }
 
 /**
