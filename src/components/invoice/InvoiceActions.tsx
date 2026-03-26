@@ -9,10 +9,32 @@
 "use client";
 
 import { useState } from "react";
-import { Printer } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Printer, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PdfDownloadButton } from "@/components/invoice/PdfDownloadButton";
 import type { Invoice } from "@/types/invoice";
+
+/**
+ * PdfDownloadButton을 동적 import로 지연 로딩
+ * - ssr: false → 서버 사이드 렌더링 제외 (클라이언트 전용)
+ * - loading → 번들 로드 전 표시할 폴백 버튼
+ * 초기 페이지 로드 시 pdf-canvas 관련 번들이 포함되지 않도록 분리합니다.
+ */
+const PdfDownloadButton = dynamic(
+  () =>
+    import("@/components/invoice/PdfDownloadButton").then(
+      (m) => m.PdfDownloadButton
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <Button variant="default" size="default" disabled aria-label="PDF 준비 중">
+        <Download className="w-4 h-4" />
+        PDF 준비 중...
+      </Button>
+    ),
+  }
+);
 
 interface InvoiceActionsProps {
   /** 견적서 전체 객체 (PDF 생성에 필요) */
