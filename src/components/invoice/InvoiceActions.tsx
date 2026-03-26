@@ -12,7 +12,6 @@ import { useState } from "react";
 import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PdfDownloadButton } from "@/components/invoice/PdfDownloadButton";
-import { toast } from "sonner";
 import type { Invoice } from "@/types/invoice";
 
 interface InvoiceActionsProps {

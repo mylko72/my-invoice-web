@@ -1,5 +1,5 @@
 /**
- * Next.js Proxy (구 middleware) — 견적서 접근 제어
+ * Next.js Proxy (구 middleware) -- 견적서 접근 제어
  *
  * Next.js 16부터 middleware.ts 대신 proxy.ts를 사용합니다.
  *
@@ -17,11 +17,25 @@
  * 4. 있으면 → 요청 통과 (실제 검증은 페이지에서)
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // Next.js 16: proxy 파일에서는 "proxy" 또는 default로 함수를 내보내야 합니다.
-export function proxy() {
-  // 모든 경로 통과 (토큰 검증 없음)
+export function proxy(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+
+  // /invoice/[id] 경로만 검사
+  if (pathname.startsWith("/invoice/")) {
+    const token = searchParams.get("token");
+
+    // 토큰 파라미터 미존재 → 접근 거부
+    if (!token) {
+      const deniedUrl = new URL("/denied", request.url);
+      deniedUrl.searchParams.set("reason", "TOKEN_INVALID");
+      return NextResponse.redirect(deniedUrl);
+    }
+  }
+
+  // 통과
   return NextResponse.next();
 }
 

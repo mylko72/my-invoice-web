@@ -83,14 +83,35 @@ function extractRelation(
 }
 
 /**
- * Notion Number 속성에서 숫자 추출
- * Phase 2: 합계금액 필드 직접 읽기 또는 계산 검증 시 활용
+ * Notion Number / Formula(number) 속성에서 숫자 추출
+ *
+ * Items DB의 "공급가액", "부가세" 필드는 Notion formula 타입이므로
+ * formula.number 경로에서도 값을 읽어야 합니다.
+ *
+ * 지원 타입:
+ * - number: property.number
+ * - formula(number): property.formula.number
+ * - rollup(number): property.rollup.number
  */
 export function extractNumber(
   property: PageObjectResponse["properties"][string]
 ): number {
   if (property.type === "number" && property.number !== null) {
     return property.number;
+  }
+  if (
+    property.type === "formula" &&
+    property.formula.type === "number" &&
+    property.formula.number !== null
+  ) {
+    return property.formula.number;
+  }
+  if (
+    property.type === "rollup" &&
+    property.rollup.type === "number" &&
+    property.rollup.number !== null
+  ) {
+    return property.rollup.number;
   }
   return 0;
 }
@@ -134,6 +155,12 @@ function parseNotionItemPage(
 function parseNotionPage(page: PageObjectResponse) {
   const props = page.properties;
 
+  // accessToken 필드는 Notion DB에 선택적으로 존재
+  // 없으면 undefined → MVP에서는 ID 기반 접근 제어 사용
+  const accessToken = props["accessToken"]
+    ? extractText(props["accessToken"])
+    : undefined;
+
   return {
     id: page.id.replace(/-/g, ""),  // Notion ID 정규화 (하이픈 제거)
     invoiceNumber: extractText(props["견적서 번호"]),
@@ -143,6 +170,7 @@ function parseNotionPage(page: PageObjectResponse) {
     dueDate: extractDate(props["만기일"]),
     status: extractSelect(props["상태"]),
     note: extractText(props["비고/메모"]),
+    accessToken: accessToken || undefined,
     itemPageIds: extractRelation(props["항목"]),  // Items DB 페이지 ID 목록
     items: [] as InvoiceItem[],  // 아래에서 별도 조회
   };
@@ -230,6 +258,86 @@ export const getInvoice = (invoiceId: string) =>
   )();
 
 // ---------------------------
+// 데이터베이스 쿼리 래퍼
+// ---------------------------
+
+/**
+ * Notion 데이터베이스에서 견적서 목록 조회 (필터/정렬/페이지네이션 지원)
+ *
+ * 서버 사이드 관리 기능이나 디버깅 시 활용합니다.
+ * 클라이언트 API에는 노출하지 않습니다.
+ *
+ * @param options - 필터, 정렬, 페이지네이션 옵션
+ * @returns 견적서 배열
+ */
+export async function queryInvoices(options?: {
+  status?: string;
+  pageSize?: number;
+  startCursor?: string;
+}): Promise<{ invoices: Invoice[]; nextCursor: string | null; hasMore: boolean }> {
+  const databaseId = process.env.NOTION_DATABASE_ID;
+  if (!databaseId) {
+    throw new Error("NOTION_DATABASE_ID 환경변수가 설정되지 않았습니다.");
+  }
+
+  // 필터 조건 구성
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const filter: any = options?.status
+    ? { property: "상태", select: { equals: options.status } }
+    : undefined;
+
+  // @notionhq/client v5에서는 databases.query가 제거됨
+  // REST API를 직접 호출하여 데이터베이스 쿼리 수행
+  const apiUrl = `https://api.notion.com/v1/databases/${databaseId}/query`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const body: Record<string, any> = {
+    sorts: [{ property: "발행일", direction: "descending" }],
+    page_size: options?.pageSize ?? 10,
+  };
+  if (filter) body.filter = filter;
+  if (options?.startCursor) body.start_cursor = options.startCursor;
+
+  const res = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.NOTION_API_KEY}`,
+      "Notion-Version": "2022-06-28",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Notion DB 쿼리 실패: ${res.status} ${res.statusText}`);
+  }
+
+  const response = await res.json() as {
+    results: PageObjectResponse[];
+    next_cursor: string | null;
+    has_more: boolean;
+  };
+
+  const invoices: Invoice[] = [];
+  for (const page of response.results) {
+    if (!("properties" in page) || page.archived) continue;
+
+    const pageData = parseNotionPage(page as PageObjectResponse);
+    const items = await fetchItemsForInvoice(pageData.itemPageIds, pageData.id);
+    const rawInvoice = { ...pageData, items };
+    const validated = validateInvoice(rawInvoice);
+    if (validated) {
+      invoices.push(validated);
+    }
+  }
+
+  return {
+    invoices,
+    nextCursor: response.next_cursor,
+    hasMore: response.has_more,
+  };
+}
+
+// ---------------------------
 // 토큰 검증
 // ---------------------------
 
@@ -238,14 +346,26 @@ export const getInvoice = (invoiceId: string) =>
  *
  * 서버 사이드에서만 호출하세요 (토큰 검증 로직 노출 방지).
  *
+ * 접근 제어 전략:
+ * 1. Notion DB에 accessToken 필드가 있는 경우 → 토큰 비교 검증
+ * 2. accessToken 필드가 없는 경우 (MVP) → token 파라미터 존재만 확인
+ *    (Notion 페이지 ID 자체가 32자리 hex로 추측 불가능하므로 MVP에서 허용)
+ *
  * @param invoice - 조회한 견적서 객체
  * @param token - URL 쿼리 파라미터에서 추출한 토큰
  * @returns 유효하면 true, 무효하면 false
  */
 export function validateAccessToken(invoice: Invoice, token: string): boolean {
-  if (!token || !invoice.accessToken) return false;
-  // 상수 시간 비교로 타이밍 공격 방지 (단순 문자열 비교)
-  return invoice.accessToken === token;
+  if (!token) return false;
+
+  // DB에 accessToken이 설정된 경우 → 정확한 토큰 비교
+  if (invoice.accessToken) {
+    return invoice.accessToken === token;
+  }
+
+  // DB에 accessToken이 없는 경우 (MVP) → token 파라미터 존재만 확인
+  // 향후 HMAC 방식이나 DB 필드 추가로 강화 가능
+  return true;
 }
 
 /**

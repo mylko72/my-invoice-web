@@ -1,16 +1,21 @@
 ---
 name: Notion API 핵심 레퍼런스
-description: Notion API v1 엔드포인트, 쿼리 패턴, 프로퍼티 타입 처리, 페이지네이션 기법
+description: Notion API v1 엔드포인트, 쿼리 패턴, 프로퍼티 타입 처리, @notionhq/client v5 주의사항
 type: reference
 ---
 
 ## 핵심 엔드포인트
-- POST /v1/databases/{database_id}/query — 데이터베이스 조회
-- POST /v1/pages — 페이지(항목) 생성
-- PATCH /v1/pages/{page_id} — 페이지 수정
-- DELETE /v1/pages/{page_id} (archived: true) — 페이지 아카이브(삭제)
-- GET /v1/databases/{database_id} — 데이터베이스 스키마 조회
-- GET /v1/blocks/{block_id}/children — 블록 자식 조회
+- POST /v1/databases/{database_id}/query -- 데이터베이스 조회
+- POST /v1/pages -- 페이지(항목) 생성
+- PATCH /v1/pages/{page_id} -- 페이지 수정
+- DELETE /v1/pages/{page_id} (archived: true) -- 페이지 아카이브(삭제)
+- GET /v1/databases/{database_id} -- 데이터베이스 스키마 조회
+- GET /v1/blocks/{block_id}/children -- 블록 자식 조회
+
+## @notionhq/client v5 주의사항
+- v5.14.0에서 `databases.query()` 메서드가 제거됨
+- DB 쿼리 시 REST API를 직접 fetch로 호출해야 함
+- pages.retrieve, databases.retrieve 등은 정상 동작
 
 ## 쿼리 구조 패턴
 - filter: 단일 조건 또는 and/or 복합 조건
@@ -18,17 +23,15 @@ type: reference
 - page_size: 최대 100 (기본 100)
 - start_cursor: 페이지네이션 커서
 
-## 프로퍼티 타입 목록
-title, rich_text, number, select, multi_select, date, checkbox,
-url, email, phone_number, relation, rollup, formula,
-created_time, last_edited_time, created_by, last_edited_by, files
-
-## 중요 패턴
-- 텍스트 추출: prop.rich_text[0]?.plain_text ?? ""
-- title 추출: prop.title[0]?.plain_text ?? ""
-- select 값: prop.select?.name ?? null
-- 날짜 값: prop.date?.start ?? null
-- 관계(relation): prop.relation.map(r => r.id)
+## 프로퍼티 타입별 값 추출
+- title: prop.title[0]?.plain_text ?? ""
+- rich_text: prop.rich_text[0]?.plain_text ?? ""
+- number: prop.number
+- formula(number): prop.formula.number (formula.type === "number" 확인 필수)
+- rollup(number): prop.rollup.number
+- select: prop.select?.name ?? null
+- date: prop.date?.start ?? null
+- relation: prop.relation.map(r => r.id)
 
 ## 에러 처리 패턴
 - 429 Rate Limit: 지수 백오프 (1s, 2s, 4s...)

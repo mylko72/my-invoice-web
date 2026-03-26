@@ -12,7 +12,7 @@
  */
 
 import { redirect } from "next/navigation";
-import { getInvoice } from "@/lib/notion";
+import { getInvoice, validateAccessToken, isInvoiceValid } from "@/lib/notion";
 import type { Metadata } from "next";
 import type { InvoiceSummary } from "@/types/invoice";
 import {
@@ -58,8 +58,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * 3. 토큰 유효성 검증 (2차)
  * 4. 견적서 만기일 확인
  */
-export default async function InvoicePage({ params }: PageProps) {
+export default async function InvoicePage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { token } = await searchParams;
 
   // Notion에서 견적서 조회 (캐시 우선)
   const invoice = await getInvoice(id);
@@ -67,6 +68,21 @@ export default async function InvoicePage({ params }: PageProps) {
   // 견적서 없음 → 접근 거부 페이지
   if (!invoice) {
     redirect("/denied?reason=INVOICE_NOT_FOUND");
+  }
+
+  // 토큰 유효성 검증 (2차 -- proxy에서 존재만 확인, 여기서 실제 검증)
+  if (!validateAccessToken(invoice, token ?? "")) {
+    redirect("/denied?reason=TOKEN_INVALID");
+  }
+
+  // 만기일 확인
+  if (!isInvoiceValid(invoice)) {
+    redirect("/denied?reason=TOKEN_EXPIRED");
+  }
+
+  // draft 상태 견적서는 비공개 (발송 전)
+  if (invoice.status === "draft") {
+    redirect("/denied?reason=TOKEN_INVALID");
   }
 
   // ---------------------------

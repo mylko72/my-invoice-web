@@ -27,7 +27,7 @@ export async function generatePdfFromDom(
 ): Promise<void> {
   let styleSheet: HTMLStyleElement | null = null;
   let allElements: NodeListOf<Element> | null = null;
-  let originalStyles: Map<Element, string> | null = null;
+  let originalStyles: Map<Element, string | null> = new Map();
 
   try {
     const element = document.getElementById(elementId);
@@ -82,7 +82,6 @@ export async function generatePdfFromDom(
       logging: false,
       backgroundColor: "#ffffff",
       allowTaint: true,
-      useTaint: false,
     });
 
     console.log(`[PDF] Canvas 생성 완료: ${canvas.width}x${canvas.height}`);
@@ -155,18 +154,22 @@ export async function generatePdfFromDom(
 
     // 에러 발생해도 스타일 복원
     try {
-      allElements.forEach((el) => {
-        const element = el as HTMLElement;
-        const originalStyle = originalStyles.get(el);
-        if (originalStyle !== undefined) {
-          if (originalStyle) {
-            element.setAttribute("style", originalStyle);
-          } else {
-            element.removeAttribute("style");
+      if (allElements) {
+        allElements.forEach((el) => {
+          const element = el as HTMLElement;
+          const originalStyle = originalStyles.get(el);
+          if (originalStyle !== undefined) {
+            if (originalStyle) {
+              element.setAttribute("style", originalStyle);
+            } else {
+              element.removeAttribute("style");
+            }
           }
-        }
-      });
-      styleSheet.remove();
+        });
+      }
+      if (styleSheet) {
+        styleSheet.remove();
+      }
     } catch (cleanupError) {
       console.error("[PDF] 스타일 복원 중 오류:", cleanupError);
     }

@@ -81,7 +81,7 @@ function parseNotionPage(page: PageObjectResponse) {
     status: extractSelect(props["상태"]),
     note: extractText(props["비고/메모"]),
     itemPageIds: extractRelation(props["항목"]),
-    items: [] as any[],
+    items: [] as InvoiceItem[],
   };
 }
 
