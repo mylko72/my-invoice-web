@@ -1,0 +1,52 @@
+[   15594ms] [ERROR] [PDF] 생성 중 오류 발생: Error: Attempting to parse an unsupported color function "lab"
+    at Object.parse (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2001:27)
+    at parseColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2118:24)
+    at parseBackgroundColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8577:56)
+    at http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8516:43
+    at step (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:160:27)
+    at Object.next (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:101:24)
+    at fulfilled (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:62:36) @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   15595ms] [ERROR] [PDF] 에러 메시지: Attempting to parse an unsupported color function "lab" @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   15595ms] [ERROR] [PDF] 에러 스택: Error: Attempting to parse an unsupported color function "lab"
+    at Object.parse (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2001:27)
+    at parseColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2118:24)
+    at parseBackgroundColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8577:56)
+    at http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8516:43
+    at step (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:160:27)
+    at Object.next (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:101:24)
+    at fulfilled (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:62:36) @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   15595ms] [ERROR] PDF 생성 실패: Error: Attempting to parse an unsupported color function "lab"
+    at Object.parse (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2001:27)
+    at parseColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2118:24)
+    at parseBackgroundColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8577:56)
+    at http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8516:43
+    at step (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:160:27)
+    at Object.next (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:101:24)
+    at fulfilled (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:62:36) @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   18541ms] [WARNING] The resource http://localhost:8000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_956a0d3a._.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:8000/invoice/32d8d00ae1e0808eb22cd8fe528b3620:0
+[   38392ms] [ERROR] [PDF] 생성 중 오류 발생: Error: Attempting to parse an unsupported color function "lab"
+    at Object.parse (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2001:27)
+    at parseColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2118:24)
+    at parseBackgroundColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8577:56)
+    at http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8516:43
+    at step (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:160:27)
+    at Object.next (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:101:24)
+    at fulfilled (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:62:36) @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   38393ms] [ERROR] [PDF] 에러 메시지: Attempting to parse an unsupported color function "lab" @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   38393ms] [ERROR] [PDF] 에러 스택: Error: Attempting to parse an unsupported color function "lab"
+    at Object.parse (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2001:27)
+    at parseColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2118:24)
+    at parseBackgroundColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8577:56)
+    at http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8516:43
+    at step (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:160:27)
+    at Object.next (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:101:24)
+    at fulfilled (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:62:36) @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   38393ms] [ERROR] PDF 생성 실패: Error: Attempting to parse an unsupported color function "lab"
+    at Object.parse (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2001:27)
+    at parseColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:2118:24)
+    at parseBackgroundColor (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8577:56)
+    at http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:8516:43
+    at step (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:160:27)
+    at Object.next (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:101:24)
+    at fulfilled (http://localhost:8000/_next/static/chunks/node_modules_html2canvas_dist_html2canvas_6fe6250c.js:62:36) @ http://localhost:8000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   41684ms] [WARNING] The resource http://localhost:8000/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_956a0d3a._.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:8000/invoice/32d8d00ae1e0808eb22cd8fe528b3620:0
